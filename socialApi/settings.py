@@ -29,6 +29,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['backend-social-api.herokuapp.com', 'localhost', '127.0.0.1']
 
+AUTH_USER_MODEL = 'emailAuth.User'
 
 # Application definition
 
@@ -39,6 +40,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'emailAuth',
+    'drf_yasg'
 ]
 
 MIDDLEWARE = [
@@ -82,6 +86,7 @@ WSGI_APPLICATION = 'socialApi.wsgi.application'
 #     }
 # }
 
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -92,6 +97,15 @@ DATABASES = {
         'PORT':'5432'
 
     }
+}
+
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 12,
+    'NON_FIELD_ERRORS_KEY': 'error',
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
 }
 
 # Password validation
