@@ -8,9 +8,6 @@ from .serializers import PostSerializer, CommentSerializer, PostListSerializer
 from .permissions import IsOwner
 
 class UserAPIView(APIView):
-    """
-    List all snippets, or create a new snippet.
-    """
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self,request, format=None):
@@ -35,7 +32,6 @@ class FollowAPIView(APIView):
         target_user.followers.add(current_user.id)
         current_user.followings.add(target_user.id)
         return Response({"Followed Successfully"},status.HTTP_200_OK)
-
 
 class UnfollowAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -78,7 +74,6 @@ class PostDetailAPIView(generics.RetrieveDestroyAPIView):
         }
         return Response(post_data, status.HTTP_200_OK)
 
-
 class LikeAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
     def post(self,request, pk, format=None):
@@ -91,7 +86,6 @@ class LikeAPIView(APIView):
             return Response({"Already liked"},status.HTTP_400_BAD_REQUEST)
         post.likes.add(current_user.id)
         return Response({"Liked Successfully"},status.HTTP_200_OK)
-
 
 class UnlikeAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -123,11 +117,9 @@ class CommentsCreateAPIView(generics.CreateAPIView):
         else:
             return Response(serializer.errors,status.HTTP_400_BAD_REQUEST)
 
-
 class AllPostsAPIView(generics.ListAPIView):
     serializer_class = PostListSerializer
     permission_classes = [permissions.IsAuthenticated, IsOwner]
-
     def get_queryset(self):
-        return Post.objects.all().filter(user=self.request.user)
+        return Post.objects.all().filter(user=self.request.user).order_by("created_at")
     
