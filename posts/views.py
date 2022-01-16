@@ -11,47 +11,47 @@ class UserAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self,request, format=None):
-        current_user = self.request.user
+        active_user = self.request.user
         user_data = {
-            'username':current_user.username,
-            'num_followers':current_user.followers.count(),
-            'num_followings':current_user.following.count(),
+            'username':active_user.username,
+            'number_of_followers':active_user.followers.count(),
+            'number_of_followings':active_user.followings.count(),
         }
         return Response(user_data,status.HTTP_200_OK)
 
 class FollowAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
     def post(self,request, pk, format=None):
-        current_user = self.request.user
+        active_user = self.request.user
         try:
             target_user = User.objects.get(id=pk)
         except:
             return Response({"This user does not exist"},status.HTTP_404_NOT_FOUND)
-        if current_user in target_user.followers.all():
-            return Response({"Already following"},status.HTTP_400_BAD_REQUEST)
-        target_user.followers.add(current_user.id)
-        current_user.followings.add(target_user.id)
-        return Response({"Followed Successfully"},status.HTTP_200_OK)
+        if active_user in target_user.followers.all():
+            return Response({"You already follow this user"},status.HTTP_400_BAD_REQUEST)
+        target_user.followers.add(active_user.id)
+        active_user.followings.add(target_user.id)
+        return Response({"You now follow this user"},status.HTTP_200_OK)
 
 class UnfollowAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
     def post(self,request, pk, format=None):
-        current_user = self.request.user
+        active_user = self.request.user
         try:
             target_user = User.objects.get(id=pk)
         except:
             return Response({"This user does not exist"},status.HTTP_404_NOT_FOUND)
-        if current_user not in target_user.followers.all():
-            return Response({"Not following this user"},status.HTTP_400_BAD_REQUEST)
-        target_user.followers.remove(current_user.id)
-        current_user.followings.remove(target_user.id)
-        return Response({"Unfollowed Successfully"},status.HTTP_200_OK)
+        if active_user not in target_user.followers.all():
+            return Response({"You already don't follow this user."},status.HTTP_400_BAD_REQUEST)
+        target_user.followers.remove(active_user.id)
+        active_user.followings.remove(target_user.id)
+        return Response({"You've unfollowed this user"},status.HTTP_200_OK)
 
 class PostsCreateAPIView(generics.CreateAPIView):
     serializer_class=PostSerializer
     queryset = Post.objects.all()
     permission_classes = [permissions.IsAuthenticated]
-    def post(self):
+    def post(self, serializer):
         serializer=PostSerializer(data = self.request.data)
 
         if serializer.is_valid():
@@ -83,9 +83,9 @@ class LikeAPIView(APIView):
         except:
             return Response({"This post does not exist"},status.HTTP_404_NOT_FOUND)
         if current_user in post.likes.all():
-            return Response({"Already liked"},status.HTTP_400_BAD_REQUEST)
+            return Response({"You have already liked this post"},status.HTTP_400_BAD_REQUEST)
         post.likes.add(current_user.id)
-        return Response({"Liked Successfully"},status.HTTP_200_OK)
+        return Response({"You have liked this post"},status.HTTP_200_OK)
 
 class UnlikeAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -96,9 +96,9 @@ class UnlikeAPIView(APIView):
         except:
             return Response({"This post does not exist"},status.HTTP_404_NOT_FOUND)
         if current_user not in post.likes.all():
-            return Response({"Not liked this post"},status.HTTP_400_BAD_REQUEST)
+            return Response({"You already don't like this post"},status.HTTP_400_BAD_REQUEST)
         post.likes.remove(current_user.id)
-        return Response({"Unliked Successfully"},status.HTTP_200_OK)
+        return Response({"You unliked this post"},status.HTTP_200_OK)
 
 class CommentsCreateAPIView(generics.CreateAPIView):
     serializer_class=CommentSerializer
@@ -109,7 +109,7 @@ class CommentsCreateAPIView(generics.CreateAPIView):
         try:
             post = Post.objects.get(id=pk)
         except:
-            return Response({"Post not found"},status.HTTP_404_NOT_FOUND)
+            return Response({"Post does not exist"},status.HTTP_404_NOT_FOUND)
         if serializer.is_valid():
             comment = serializer.save(user=self.request.user)
             post.comments.add(comment)

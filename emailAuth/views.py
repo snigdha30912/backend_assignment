@@ -1,5 +1,5 @@
 from rest_framework import generics, status
-from .serializers import RegisterSerializer, LoginSerializer
+from .serializers import LoginSerializer, RegisterSerializer
 from rest_framework.response import Response
 
 class RegisterView(generics.GenericAPIView):
